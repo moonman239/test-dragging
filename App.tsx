@@ -1,12 +1,45 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useRef } from "react";
+import { Animated, View, StyleSheet, PanResponder, Text, FlatList} from "react-native";
 
-export default function App() {
+const DraggableComponent = () => {
+const pan = useRef(new Animated.ValueXY()).current;
+const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        pan.setOffset({
+          x: pan.x._value,
+          y: pan.y._value
+        });
+      },
+      onPanResponderMove: Animated.event(
+        [
+          null,
+          { dx: pan.x, dy: pan.y }
+        ]
+      ),
+      onPanResponderRelease: () => {
+        pan.flattenOffset();
+      }
+    })
+  ).current;
+  return  <Animated.View
+        style={{
+          transform: [{ translateX: pan.x }, { translateY: pan.y }]
+        }}
+        {...panResponder.panHandlers}
+      >
+      
+        <View style={styles.box} />
+      </Animated.View>;
+};
+
+const App = () => {
+  
   return (
     <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
+      <Text style={styles.titleText}>Drag this box!</Text>
+      <FlatList horizontal={true} data={[{key:"b"},{key:"c"},{key:"d"},{key:"e"}]} renderItem={({item}) => <DraggableComponent />} />
     </View>
   );
 }
@@ -14,8 +47,20 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center"
   },
+  titleText: {
+    fontSize: 14,
+    lineHeight: 24,
+    fontWeight: "bold"
+  },
+  box: {
+    height: 150,
+    width: 150,
+    backgroundColor: "blue",
+    borderRadius: 5
+  }
 });
+
+export default App;
