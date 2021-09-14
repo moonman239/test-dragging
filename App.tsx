@@ -1,38 +1,35 @@
 import React, { useRef } from "react";
-import { Animated, View, StyleSheet, PanResponder, Text, FlatList} from "react-native";
+import { View, StyleSheet, Text, FlatList} from "react-native";
+import { PanGestureHandler } from "react-native-gesture-handler";
+import { Animated } from "react-native";
 
-const DraggableComponent = () => {
-const pan = useRef(new Animated.ValueXY()).current;
-const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        pan.setOffset({
-          x: pan.x._value,
-          y: pan.y._value
-        });
-      },
-      onPanResponderMove: Animated.event(
-        [
-          null,
-          { dx: pan.x, dy: pan.y }
-        ]
-      ),
-      onPanResponderRelease: () => {
-        pan.flattenOffset();
-      }
-    })
-  ).current;
-  return  <Animated.View
-        style={{
-          transform: [{ translateX: pan.x }, { translateY: pan.y }]
-        }}
-        {...panResponder.panHandlers}
-      >
-      
+class DraggableComponent extends React.Component
+{
+  translateX = new Animated.Value(0);
+  translateY = new Animated.Value(0);
+  handleGesture = Animated.event(
+    [{nativeEvent: {translationX : this.translateX,translationY:this.translateY}}],
+    {useNativeDriver:true}
+    );
+  render()
+  {
+    const transformStyle = {
+      transform: [
+        {
+          translateY: this.translateY
+        },
+        {
+          translateX: this.translateX
+        }
+      ]
+    }
+    return  <PanGestureHandler onGestureEvent={this.handleGesture} >
+      <Animated.View style={transformStyle}>
         <View style={styles.box} />
-      </Animated.View>;
-};
+      </Animated.View>
+      </PanGestureHandler>;
+  }
+}
 
 const App = () => {
   
